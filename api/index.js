@@ -1,33 +1,34 @@
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.status(405).send("Only POST allowed");
+  if (req.method !== 'POST') {
+    res.status(405).send('Only POST allowed');
     return;
   }
 
-  // Extraire les données de la requête
+  // Récupère les données envoyées
   let data = req.body;
-  if (typeof data === "string") {
+  if (typeof data === 'string') {
     try {
       data = JSON.parse(data);
-    } catch (e) {}
+    } catch (e) {
+      res.status(500).json({ error: 'Invalid JSON data' });
+      return;
+    }
   }
 
   // Remplace cette URL par l'URL de ton script Google Apps
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1xHHY2iurnHAF6EBRGIKERPuolzYZDnIw00ZH15chAHnBRRJhG4E5815mpMrikpU9Lw/exec";
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/TON_URL/exec';
 
   try {
-    // Envoie la requête POST vers Google Sheets
-    const r = await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
 
-    // Récupère la réponse du script
-    const response = await r.text();
-    res.status(200).json({ ok: true, google: response });
+    const googleResponse = await response.text();
+    res.status(200).json({ ok: true, google: googleResponse });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
